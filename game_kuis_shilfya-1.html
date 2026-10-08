@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Petualangan Pengetahuan Shilfya</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:"Trebuchet MS",Arial,sans-serif;overflow:hidden}
+button{font:inherit;cursor:pointer}
+#game{min-height:100vh;position:relative;overflow:hidden;color:#fff}
+.screen{min-height:100vh;width:100%;display:flex;align-items:center;justify-content:center;padding:20px}
+.hidden{display:none!important}
+
+/* Animated world map */
+.intro{background:linear-gradient(135deg,#4fc3f7,#81d4fa 45%,#4dd0e1);position:relative}
+.map{position:absolute;inset:0;opacity:.25;background:
+radial-gradient(ellipse at 15% 30%,#1687a7 0 10%,transparent 11%),
+radial-gradient(ellipse at 42% 25%,#1687a7 0 13%,transparent 14%),
+radial-gradient(ellipse at 72% 38%,#1687a7 0 15%,transparent 16%),
+radial-gradient(ellipse at 28% 70%,#1687a7 0 11%,transparent 12%),
+radial-gradient(ellipse at 78% 73%,#1687a7 0 10%,transparent 11%);
+animation:drift 10s ease-in-out infinite alternate}
+@keyframes drift{to{transform:scale(1.08) rotate(1deg)}}
+.cloud{position:absolute;font-size:60px;opacity:.65;animation:cloud 18s linear infinite}
+.c1{top:8%;left:-10%}.c2{top:65%;left:60%;animation-duration:24s}
+@keyframes cloud{to{transform:translateX(120vw)}}
+
+.card{position:relative;z-index:2;width:min(900px,96vw);text-align:center}
+.character{font-size:120px;filter:drop-shadow(0 10px 4px #0003);animation:bob 2s infinite ease-in-out}
+@keyframes bob{50%{transform:translateY(-12px)}}
+.name{font-size:clamp(26px,5vw,44px);font-weight:900;text-shadow:3px 4px #18738c}
+.speech{background:#fff;color:#234;padding:22px 26px;border-radius:28px;max-width:780px;margin:15px auto 25px;font-size:clamp(17px,3vw,24px);font-weight:700;box-shadow:0 12px 30px #0003;position:relative}
+.speech:after{content:"";position:absolute;bottom:-18px;left:50%;border:18px solid transparent;border-top-color:#fff;border-bottom:0}
+.mainbtn{border:0;border-radius:999px;padding:16px 60px;background:#ffca28;color:#5d3500;font-weight:900;font-size:26px;box-shadow:0 7px 0 #d99b00;transition:.15s}
+.mainbtn:hover{transform:translateY(-3px);box-shadow:0 10px 0 #d99b00}
+
+/* Quiz backgrounds */
+.quiz{transition:background .5s}
+.theme-laut{background:linear-gradient(#25c6e8,#005b91)}
+.theme-antariksa{background:radial-gradient(circle at 70% 20%,#7b4dcc,#090d35 55%,#020313)}
+.theme-hutan{background:linear-gradient(#8bdc65,#26734b)}
+.theme-prasejarah{background:linear-gradient(#f2b36b,#a95d43)}
+.theme-alam{background:linear-gradient(#91df76,#2f9b62)}
+.theme-salju{background:linear-gradient(#b9efff,#5d9dd0)}
+.theme-dunia{background:linear-gradient(#75d5ff,#3279c5)}
+.theme-sains{background:linear-gradient(#8c9eff,#4b53a8)}
+.theme-serangga{background:linear-gradient(#a7e86c,#42944b)}
+
+.scene{position:absolute;inset:0;overflow:hidden;opacity:.6}
+.scene span{position:absolute;font-size:55px;animation:float 4s infinite ease-in-out}
+@keyframes float{50%{transform:translateY(-20px) rotate(5deg)}}
+.s1{left:8%;top:12%}.s2{right:10%;top:18%;animation-delay:.7s}.s3{left:14%;bottom:12%;animation-delay:1.2s}.s4{right:12%;bottom:14%;animation-delay:1.8s}
+
+.quizbox{position:relative;z-index:3;width:min(900px,96vw);background:#ffffffee;color:#24304a;border-radius:28px;padding:20px;box-shadow:0 18px 45px #0005}
+.top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.lives{font-size:25px;letter-spacing:3px}.progress{font-weight:900;background:#e7eef8;padding:8px 15px;border-radius:20px}
+.question-img{height:150px;display:flex;align-items:center;justify-content:center;font-size:105px}
+.question{font-size:clamp(21px,4vw,31px);font-weight:900;text-align:center;margin:8px 0 18px}
+.answers{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.answer{border:3px solid #dbe5f2;background:#f7faff;border-radius:18px;padding:15px;text-align:left;font-weight:800;font-size:18px;transition:.15s}
+.answer:hover{transform:scale(1.02);background:#eaf5ff}
+.answer.correct{background:#b9f6c2;border-color:#31a94b}
+.answer.wrong{background:#ffc5c5;border-color:#e44}
+.feedback{position:fixed;z-index:10;inset:0;background:#0006;display:flex;align-items:center;justify-content:center}
+.feedback-card{background:#fff;color:#25304b;border-radius:30px;padding:28px;text-align:center;width:min(500px,90vw);animation:pop .35s}
+@keyframes pop{from{transform:scale(.6);opacity:0}to{transform:scale(1);opacity:1}}
+.feedback-icon{font-size:80px}.feedback-text{font-size:24px;font-weight:900;margin:10px}
+.next{border:0;background:#4caf50;color:#fff;padding:12px 30px;border-radius:999px;font-weight:900}
+
+/* End */
+.end{background:linear-gradient(135deg,#5133a5,#e44b88)}
+.end .character{font-size:120px}
+.end-title{font-size:clamp(32px,7vw,55px);font-weight:1000;text-shadow:3px 4px #0004}
+.message{background:#fff;color:#26304b;border-radius:25px;padding:22px;font-size:20px;font-weight:800;margin:18px auto;max-width:700px}
+.confetti{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.confetti i{position:absolute;top:-30px;font-size:28px;animation:fall 3s linear infinite}
+@keyframes fall{to{transform:translateY(110vh) rotate(600deg)}}
+@media(max-width:650px){.answers{grid-template-columns:1fr}.question-img{height:115px;font-size:80px}.quizbox{padding:14px}.speech{padding:18px}.character{font-size:90px}}
+</style>
+</head>
+<body>
+<div id="game"></div>
+
+<script>
+const questions=[
+ {theme:"theme-laut",icon:"🐋",q:"Hewan mamalia terbesar di bumi yang hidup di laut adalah...",a:["Hiu Paut","Paus Biru","Lumba-Lumba","Anjing Laut"],correct:1,bg:["🌊","🐠","🪸","🐚"]},
+ {theme:"theme-antariksa",icon:"☀️🪐",q:"Planet yang paling dekat dengan Matahari adalah...",a:["Venus","Mars","Merkurius","Jupiter"],correct:2,bg:["🌙","⭐","🪐","🚀"]},
+ {theme:"theme-hutan",icon:"🦅🏃",q:"Burung yang tidak bisa terbang tetapi sangat jago berlari cepat adalah...",a:["Burung Unta","Burung Elang","Burung Merpati","Burung Kakak Tua"],correct:0,bg:["🌳","🦋","🌿","🐒"]},
+ {theme:"theme-prasejarah",icon:"🦖",q:"Reptil raksasa yang hidup pada zaman purba dan kini telah punah disebut...",a:["Komodo","Dinosaurus","Buaya","Iguana"],correct:1,bg:["🌋","🦕","🌴","☄️"]},
+ {theme:"theme-alam",icon:"🌱☀️",q:"Proses tumbuhan membuat makanannya sendiri menggunakan bantuan cahaya matahari disebut...",a:["Respirasi","Fotosintesis","Evaporasi","Adaptasi"],correct:1,bg:["🌱","☀️","🌻","💧"]},
+ {theme:"theme-salju",icon:"🐻‍❄️",q:"Hewan lucu berbulu putih yang tinggal di Kutub Utara dan pandai berenang adalah...",a:["Beruang Madu","Beruang Kutub","Panda","Koala"],correct:1,bg:["❄️","🏔️","🧊","🐟"]},
+ {theme:"theme-dunia",icon:"🗼🌍",q:"Negara yang terkenal dengan bangunan Menara Eiffel berada di benua...",a:["Asia","Amerika","Eropa","Afrika"],correct:2,bg:["🌍","✈️","🗼","🧭"]},
+ {theme:"theme-sains",icon:"❤️",q:"Bagian tubuh kita yang berfungsi untuk memompa darah ke seluruh tubuh adalah...",a:["Paru-paru","Jantung","Lambung","Hati"],correct:1,bg:["🔬","🧠","❤️","🧪"]},
+ {theme:"theme-serangga",icon:"🦋🌸",q:"Serangga yang suka mengisap nektar bunga dan berubah dari ulat disebut...",a:["Kupu-kupu","Lebah","Capung","Lalat"],correct:0,bg:["🌸","🦋","🌿","🐛"]},
+ {theme:"theme-sains",icon:"🌡️",q:"Alat yang digunakan untuk mengukur suhu tubuh saat kita demam adalah...",a:["Penggaris","Timbangan","Termometer","Jam"],correct:2,bg:["🌡️","🔬","🧪","💡"]}
+];
+
+let current=0,lives=5,locked=false;
+
+function intro(){
+document.getElementById("game").innerHTML=`
+<section class="screen intro">
+ <div class="map"></div><div class="cloud c1">☁️☁️</div><div class="cloud c2">☁️</div>
+ <div class="card">
+   <div class="character">🧒🎒</div>
+   <div class="name">SHILFYA SUCIATI</div>
+   <div class="speech">Halo teman-teman! Namaku Shilfya Suciati. Yuk, berpetualang denganku keliling dunia dan asah pengetahuanmu! Kita akan belajar hal-hal seru di setiap soal!</div>
+   <button class="mainbtn" onclick="startGame()">MULAI</button>
+ </div>
+</section>`;
+}
+function startGame(){current=0;lives=5;showQuestion()}
+function showQuestion(){
+locked=false;let x=questions[current];
+document.getElementById("game").innerHTML=`
+<section class="screen quiz ${x.theme}">
+ <div class="scene"><span class="s1">${x.bg[0]}</span><span class="s2">${x.bg[1]}</span><span class="s3">${x.bg[2]}</span><span class="s4">${x.bg[3]}</span></div>
+ <div class="quizbox">
+  <div class="top"><div class="lives">${"❤️".repeat(lives)}${"🖤".repeat(5-lives)}</div><div class="progress">SOAL ${current+1} / 10</div></div>
+  <div class="question-img">${x.icon}</div>
+  <div class="question">${x.q}</div>
+  <div class="answers">${x.a.map((v,i)=>`<button class="answer" onclick="answer(${i},this)">${String.fromCharCode(65+i)}. ${v}</button>`).join("")}</div>
+ </div>
+</section>`;
+}
+function answer(i,btn){
+if(locked)return;locked=true;
+let x=questions[current];
+if(i===x.correct){
+btn.classList.add("correct");
+feedback(true);
+}else{
+btn.classList.add("wrong");lives--;
+feedback(false);
+}
+}
+function feedback(ok){
+let icon=ok?"🌟👍":"😢💧";
+let text=ok?"WUIHH KEREN! Jawabanmu tepat sekali! 🌟":"Opps, hampir benar! Jangan patah semangat ya! 😢";
+document.body.insertAdjacentHTML("beforeend",`
+<div class="feedback" id="feedback">
+ <div class="feedback-card">
+  <div class="feedback-icon">${icon}</div>
+  <div class="feedback-text">${text}</div>
+  ${!ok?`<div style="font-weight:800;margin-bottom:12px">Nyawa tersisa: ${lives} ❤️</div>`:""}
+  <button class="next" onclick="nextQuestion()">LANJUT ➜</button>
+ </div>
+</div>`);
+}
+function nextQuestion(){
+document.getElementById("feedback")?.remove();
+if(lives<=0){gameOver();return}
+current++;
+if(current>=questions.length)win();else showQuestion();
+}
+function gameOver(){
+document.getElementById("game").innerHTML=`
+<section class="screen end">
+ <div class="card">
+  <div class="character">🧒😭☔</div>
+  <div class="end-title">GAME OVER</div>
+  <div class="message">Ayo, jangan menyerah! Kegagalan adalah awal dari keberhasilan. Belajar lebih giat lagi dan coba lagi ya! 💪</div>
+  <button class="mainbtn" onclick="startGame()">COBA LAGI</button>
+ </div>
+</section>`;
+}
+function win(){
+let conf=Array.from({length:45},(_,i)=>`<i style="left:${Math.random()*100}%;animation-delay:${Math.random()*2.5}s">🎉</i>`).join("");
+document.getElementById("game").innerHTML=`
+<section class="screen end">
+ <div class="confetti">${conf}</div>
+ <div class="card">
+  <div class="character">🧒🎒🏆</div>
+  <div class="end-title">SELAMAT! 🏆✨</div>
+  <div class="message">Kamu berhasil menyelesaikan semua pertanyaan! Kamu adalah Penjelajah Pengetahuan Sejati! 🏆✨</div>
+  <button class="mainbtn" onclick="startGame()">MAIN LAGI</button>
+ </div>
+</section>`;
+}
+intro();
+</script>
+</body>
+</html>
